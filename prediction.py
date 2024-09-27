@@ -13,9 +13,9 @@ if uploaded_file:
     df = pd.read_csv(uploaded_file)
     st.write("Dataset Preview", df.head())
 
-    # Feature selection (modify based on your dataset)
-    features = ['Principle Passes', 'Option']
-    df = df.dropna(subset=features)
+    # Feature selection (including 'SPECIALIZATION')
+    features = ['Principle Passes', 'Option', 'SPECIALIZATION']
+    df = df.dropna(subset=features)  # Handle missing data by dropping rows with null values
     
     # Standardize features
     scaler = StandardScaler()
