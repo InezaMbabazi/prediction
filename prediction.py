@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.cluster import KMeans
 import streamlit as st
 
@@ -13,9 +13,15 @@ if uploaded_file:
     df = pd.read_csv(uploaded_file)
     st.write("Dataset Preview", df.head())
 
+    # Encode the 'SPECIALIZATION' column (convert it to numeric)
+    le = LabelEncoder()
+    df['SPECIALIZATION'] = le.fit_transform(df['SPECIALIZATION'])
+
     # Feature selection (including 'SPECIALIZATION')
     features = ['Principle Passes', 'Option', 'SPECIALIZATION']
-    df = df.dropna(subset=features)  # Handle missing data by dropping rows with null values
+    
+    # Handle missing data by dropping rows with null values
+    df = df.dropna(subset=features)  
     
     # Standardize features
     scaler = StandardScaler()
