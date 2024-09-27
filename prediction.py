@@ -13,14 +13,18 @@ if uploaded_file:
     df = pd.read_csv(uploaded_file)
     st.write("Dataset Preview", df.head())
 
-    # Encode the 'SPECIALIZATION' column (convert it to numeric)
+    # Convert 'SPECIALIZATION' to numeric using LabelEncoder
     le = LabelEncoder()
     df['SPECIALIZATION'] = le.fit_transform(df['SPECIALIZATION'])
+
+    # Ensure 'Principle Passes' and 'Option' are numeric
+    df['Principle Passes'] = pd.to_numeric(df['Principle Passes'], errors='coerce')
+    df['Option'] = pd.to_numeric(df['Option'], errors='coerce')
 
     # Feature selection (including 'SPECIALIZATION')
     features = ['Principle Passes', 'Option', 'SPECIALIZATION']
     
-    # Handle missing data by dropping rows with null values
+    # Drop rows with missing or non-numeric data in selected features
     df = df.dropna(subset=features)  
     
     # Standardize features
