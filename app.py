@@ -1,11 +1,34 @@
 import streamlit as st
 import pandas as pd
 import joblib
+from sklearn.linear_model import LinearRegression
 
-# Load the trained model
-model = joblib.load('student_model.pkl')
+# Try to load the model, or train it if not available
+try:
+    model = joblib.load('student_model.pkl')
+except FileNotFoundError:
+    st.write("Model not found. Training a new model...")
+    
+    # Sample training data (you should replace this with your own dataset)
+    data = {
+        'High_School_Grade': [85, 90, 60, 75, 82],
+        'Entry_Exam_Score': [78, 85, 65, 70, 80],
+        'Current_Marks': [75, 88, 58, 72, 79]
+    }
+    df_train = pd.DataFrame(data)
 
-# Streamlit app
+    X_train = df_train[['High_School_Grade', 'Entry_Exam_Score']]
+    y_train = df_train['Current_Marks']
+
+    # Train the model
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    # Save the trained model
+    joblib.dump(model, 'student_model.pkl')
+    st.write("Model trained and saved.")
+
+# Streamlit app for prediction
 st.title("Student Performance Prediction")
 
 # Upload CSV file
