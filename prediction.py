@@ -1,42 +1,36 @@
-import pandas as pd
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from sklearn.cluster import KMeans
 import streamlit as st
+import pandas as pd
+import lightgbm as lgb
+from sklearn.model_selection import train_test_split
 
-st.title("Student Enrollment Prediction App")
+# Load the trained model (assuming you save your model with joblib or pickle)
+import joblib
 
-# File uploader
-uploaded_file = st.file_uploader("Upload your dataset", type="csv")
+# Load your model (you'll need to save your model before this step)
+model = joblib.load('model.pkl')
 
-if uploaded_file:
-    # Read dataset
+# Streamlit app
+st.title("Enrollment Prediction App")
+
+# Upload CSV file
+uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
+
+if uploaded_file is not None:
+    # Read the CSV file
     df = pd.read_csv(uploaded_file)
-    st.write("Dataset Preview", df.head())
-
-    # Convert 'SPECIALIZATION' to numeric using LabelEncoder
-    le = LabelEncoder()
-    df['SPECIALIZATION'] = le.fit_transform(df['SPECIALIZATION'])
-
-    # Ensure 'Principle Passes' and 'Option' are numeric
-    df['Principle Passes'] = pd.to_numeric(df['Principle Passes'], errors='coerce')
-    df['Option'] = pd.to_numeric(df['Option'], errors='coerce')
-
-    # Feature selection (including 'SPECIALIZATION')
-    features = ['Principle Passes', 'Option', 'SPECIALIZATION']
     
-    # Drop rows with missing or non-numeric data in selected features
-    df = df.dropna(subset=features)  
+    # Selecting relevant features
+    features = ['CAMPUS', 'FACULTY', 'DEPARTMENT', 'PROGRAM', 'ACADEMIC YEAR', 'YEAR OF COMPLETION', 'PRINCIPAL PASSES']
     
-    # Standardize features
-    scaler = StandardScaler()
-    scaled_features = scaler.fit_transform(df[features])
+    # Convert categorical columns to 'category' type
+    for feature in features:
+        df[feature] = df[feature].astype('category')
 
-    # K-Means Clustering
-    kmeans = KMeans(n_clusters=5)  # Change number of clusters as needed
-    df['Cluster'] = kmeans.fit_predict(scaled_features)
-
-    # Group by secondary school
-    school_group = df.groupby('Secondary School Name')['Cluster'].count()
-
+    # Make predictions
+    predictions = model.predict(df[features])
+    
     # Display predictions
-    st.write("Predicted number of students per school", school_group)
+    st.write("Predictions for REG. NUMBER:")
+    st.write(predictions)
+
+# Additional features, such as visualizations, can be added here
