@@ -5,7 +5,7 @@ from sklearn.linear_model import LinearRegression
 import numpy as np
 
 # Streamlit app for student performance prediction
-st.title("Student Performance Prediction")
+st.title("Student Group Performance Prediction")
 
 # Try to load the model, or train a new one if not available
 try:
@@ -13,7 +13,7 @@ try:
 except FileNotFoundError:
     st.write("Model not found. Training a new model...")
 
-    # Sample training data
+    # Sample training data for regression
     data = {
         'High_School_Grade': [85, 90, 60, 75, 82],
         'Entry_Exam_Score': [78, 85, 65, 70, 80],
@@ -33,12 +33,15 @@ except FileNotFoundError:
     joblib.dump(model, 'student_model.pkl')
     st.write("Model trained and saved.")
 
-# Function to determine performance status
-def determine_performance_status(predicted_marks, actual_marks):
-    if predicted_marks >= actual_marks:
-        return "On Track"
+# Function to determine performance status based on group trends
+def determine_group_performance_status(row, group_avg, prediction):
+    # Compare the predicted marks with the actual current marks
+    if row['Current_Marks'] > prediction + 2:
+        return "Exceeding Expectations"
+    elif row['Current_Marks'] < prediction - 2:
+        return "Underperforming"
     else:
-        return "Needs Improvement"
+        return "Meeting Expectations"
 
 # CSV Template
 def create_template():
@@ -74,10 +77,11 @@ if uploaded_file is not None:
         # Make predictions
         predictions = model.predict(features)
         
-        # Determine performance status
-        df['Predicted_Current_Marks'] = predictions
-        df['Performance_Status'] = np.where(df['Predicted_Current_Marks'] >= df['Current_Marks'], "On Track", "Needs Improvement")
+        # Calculate the group average for comparison
+        group_avg = df['High_School_Grade'].mean()
         
-        # Display predictions with performance status
-        st.write("Predictions and Performance Status:")
-        st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Current_Marks', 'Performance_Status']])
+        # Determine group performance status for each student
+        performance_status = []
+        for i, row in df.iterrows():
+            prediction = predictions[i]
+           
