@@ -1,32 +1,31 @@
-import streamlit as st
+import os
 import pandas as pd
 import joblib
+from sklearn.linear_model import LinearRegression
+
+# Function to train and save the model if it does not exist
+def train_model():
+    if not os.path.exists('student_model.pkl'):
+        # Sample dataset (you can replace this with your own data)
+        data = {
+            'High_School_Grade': [85, 90, 60, 75, 82],
+            'Entry_Exam_Score': [78, 85, 65, 70, 80],
+            'Current_Marks': [75, 88, 58, 72, 79]
+        }
+        df = pd.DataFrame(data)
+
+        X = df[['High_School_Grade', 'Entry_Exam_Score']]
+        y = df['Current_Marks']
+
+        model = LinearRegression()
+        model.fit(X, y)
+
+        joblib.dump(model, 'student_model.pkl')
+
+# Train the model if it doesn't exist
+train_model()
 
 # Load the trained model
 model = joblib.load('student_model.pkl')
 
-# Streamlit app
-st.title("Student Performance Prediction")
-
-# Upload CSV file
-uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
-
-if uploaded_file is not None:
-    # Read the CSV file
-    df = pd.read_csv(uploaded_file)
-    
-    # Assuming the CSV has the same columns as used for training
-    st.write("Input Data:")
-    st.write(df)
-
-    if st.button("Predict"):
-        # Prepare the features for prediction
-        features = df[['High_School_Grade', 'Entry_Exam_Score']]
-        
-        # Make predictions
-        predictions = model.predict(features)
-        
-        # Display predictions
-        df['Predicted_Current_Marks'] = predictions
-        st.write("Predictions:")
-        st.write(df[['High_School_Grade', 'Entry_Exam_Score', 'Predicted_Current_Marks']])
+# Rest of your Streamlit app
