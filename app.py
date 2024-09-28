@@ -12,6 +12,10 @@ except FileNotFoundError:
     st.error("Model not found. Please train and save the model first.")
     st.stop()
 
+# Title and description
+st.title("University Student's Prediction")
+st.write("This model will be used to determine a student's performance using historical data from high school and entry exams.")
+
 # Function to determine performance status based on group trends
 def determine_group_performance_status(row, prediction):
     difference = row['Current_Marks'] - prediction
@@ -81,3 +85,7 @@ if uploaded_file is not None:
         ax.pie(performance_counts, labels=performance_counts.index, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'])
         ax.axis('equal')  # Equal aspect ratio ensures that pie chart is circular.
         st.pyplot(fig)
+
+# Footer
+st.write("---")
+st.write("Powered by Kepler College")
