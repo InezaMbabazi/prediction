@@ -18,8 +18,8 @@ except FileNotFoundError:
     data = {
         'High_School_Grade': [85, 90, 60, 75, 82],
         'Entry_Exam_Score': [78, 85, 65, 70, 80],
-        'Principal_Passes': [12, 14, 10, 9, 15],
         'Current_Marks': [75, 88, 58, 72, 79],
+        'Principal_Passes': [12, 14, 10, 9, 15],
         'Passed': [1, 1, 0, 1, 1]  # 1 for passed, 0 for not passed
     }
     df_train = pd.DataFrame(data)
@@ -51,8 +51,8 @@ def create_template():
         "Student_ID": [],
         "High_School_Grade": [],
         "Entry_Exam_Score": [],
-        "Principal_Passes": [],
-        "Current_Marks": []
+        "Current_Marks": [],
+        "Principal_Passes": []
     }
     df_template = pd.DataFrame(template_data)
     return df_template
@@ -78,46 +78,39 @@ if uploaded_file is not None:
         feature_columns = ['High_School_Grade', 'Entry_Exam_Score', 'Principal_Passes']
         available_features = df[feature_columns].dropna()
 
-        # Ensure the features are in the same order as the model was trained
-        available_features = available_features[feature_columns]
+        # Predict using available features
+        predictions = model.predict(available_features)
 
-        # Check if there are enough features to predict
-        if len(available_features) > 0:
-            # Predict using available features
-            predictions = model.predict(available_features)
+        # Fill predictions back into the original DataFrame
+        df['Predicted_Marks'] = np.nan
+        df.loc[available_features.index, 'Predicted_Marks'] = predictions
 
-            # Fill predictions back into the original DataFrame
-            df['Predicted_Marks'] = np.nan
-            df.loc[available_features.index, 'Predicted_Marks'] = predictions
+        # Calculate the group average for comparison
+        group_avg = df['High_School_Grade'].mean()
+        
+        # Determine group performance status for each student
+        performance_status = []
+        for i, row in df.iterrows():
+            if pd.notna(row['Predicted_Marks']):
+                status = determine_group_performance_status(row, group_avg, row['Predicted_Marks'])
+            else:
+                status = "Insufficient Data"
+            performance_status.append(status)
+        
+        # Add performance status to the dataframe
+        df['Performance_Status'] = performance_status
+        
+        # Display predictions and performance status
+        st.write("Predictions and Performance Status:")
+        st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Principal_Passes', 'Predicted_Marks', 'Performance_Status']])
+        
+        # Plot a pie chart for performance status
+        st.write("Performance Status Breakdown:")
+        performance_counts = df['Performance_Status'].value_counts()
 
-            # Calculate the group average for comparison
-            group_avg = df['High_School_Grade'].mean()
-            
-            # Determine group performance status for each student
-            performance_status = []
-            for i, row in df.iterrows():
-                if pd.notna(row['Predicted_Marks']):
-                    status = determine_group_performance_status(row, group_avg, row['Predicted_Marks'])
-                else:
-                    status = "Insufficient Data"
-                performance_status.append(status)
-            
-            # Add performance status to the dataframe
-            df['Performance_Status'] = performance_status
-            
-            # Display predictions and performance status
-            st.write("Predictions and Performance Status:")
-            st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Principal_Passes', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
-            
-            # Plot a pie chart for performance status
-            st.write("Performance Status Breakdown:")
-            performance_counts = df['Performance_Status'].value_counts()
-
-            # Plotting the pie chart
-            fig, ax = plt.subplots()
-            ax.pie(performance_counts, labels=performance_counts.index, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red', 'blue'])
-            ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular.
-            plt.title("STUDENT PERFORMANCE EXPECTATIONS")
-            st.pyplot(fig)
-        else:
-            st.write("No available features for prediction.")
+        # Plotting the pie chart
+        fig, ax = plt.subplots()
+        ax.pie(performance_counts, labels=performance_counts.index, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red', 'blue'])
+        ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular.
+        plt.title("STUDENT PERFORMANCE EXPECTATIONS")
+        st.pyplot(fig)
