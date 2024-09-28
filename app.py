@@ -3,6 +3,7 @@ import pandas as pd
 import joblib
 from sklearn.linear_model import LinearRegression
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Streamlit app for student performance prediction
 st.title("Student Group Performance Prediction")
@@ -35,7 +36,6 @@ except FileNotFoundError:
 
 # Function to determine performance status based on group trends
 def determine_group_performance_status(row, group_avg, prediction):
-    # Compare the predicted marks with the actual current marks
     if row['Current_Marks'] > prediction + 2:
         return "Exceeding Expectations"
     elif row['Current_Marks'] < prediction - 2:
@@ -95,5 +95,14 @@ if uploaded_file is not None:
         st.write("Predictions and Performance Status:")
         st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
         
-        # Force the output to appear even if button is clicked multiple times
-        st.dataframe(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
+        # Plot a bar chart for performance status
+        st.write("Performance Status Breakdown:")
+        performance_counts = df['Performance_Status'].value_counts()
+
+        # Plotting the bar chart
+        fig, ax = plt.subplots()
+        ax.bar(performance_counts.index, performance_counts.values, color=['green', 'yellow', 'red'])
+        ax.set_xlabel("Performance Status")
+        ax.set_ylabel("Number of Students")
+        ax.set_title("Student Performance Status Breakdown")
+        st.pyplot(fig)
