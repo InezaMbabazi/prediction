@@ -5,7 +5,7 @@ from sklearn.linear_model import LinearRegression
 
 # Function to train and save the model if it does not exist
 def train_model():
-    if not os.path.exists('student_model.pkl'):
+    if not os.path.exists('model.pkl'):
         # Sample dataset (you can replace this with your own data)
         data = {
             'High_School_Grade': [85, 90, 60, 75, 82],
@@ -20,12 +20,12 @@ def train_model():
         model = LinearRegression()
         model.fit(X, y)
 
-        joblib.dump(model, 'student_model.pkl')
+        joblib.dump(model, 'model.pkl')
 
 # Train the model if it doesn't exist
 train_model()
 
 # Load the trained model
-model = joblib.load('student_model.pkl')
+model = joblib.load('predictionmodel.pkl')
 
 # Rest of your Streamlit app
