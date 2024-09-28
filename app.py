@@ -18,8 +18,8 @@ except FileNotFoundError:
     data = {
         'High_School_Grade': [85, 90, 60, 75, 82],
         'Entry_Exam_Score': [78, 85, 65, 70, 80],
-        'Current_Marks': [75, 88, 58, 72, 79],
         'Principal_Passes': [12, 14, 10, 9, 15],
+        'Current_Marks': [75, 88, 58, 72, 79],
         'Passed': [1, 1, 0, 1, 1]  # 1 for passed, 0 for not passed
     }
     df_train = pd.DataFrame(data)
@@ -51,8 +51,8 @@ def create_template():
         "Student_ID": [],
         "High_School_Grade": [],
         "Entry_Exam_Score": [],
-        "Current_Marks": [],
-        "Principal_Passes": []
+        "Principal_Passes": [],
+        "Current_Marks": []
     }
     df_template = pd.DataFrame(template_data)
     return df_template
@@ -107,7 +107,7 @@ if uploaded_file is not None:
             
             # Display predictions and performance status
             st.write("Predictions and Performance Status:")
-            st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Principal_Passes', 'Predicted_Marks', 'Performance_Status']])
+            st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Principal_Passes', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
             
             # Plot a pie chart for performance status
             st.write("Performance Status Breakdown:")
