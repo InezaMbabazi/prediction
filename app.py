@@ -14,11 +14,14 @@ except FileNotFoundError:
 
 # Function to determine performance status based on group trends
 def determine_group_performance_status(row, prediction):
-    if row['Current_Marks'] > prediction + 2:
+    difference = row['Current_Marks'] - prediction
+    if difference >= 5:  # Significant increase
         return "Exceeding Expectations"
-    elif row['Current_Marks'] < prediction - 2:
+    elif 0 <= difference < 5:  # Minor increase or close to predicted
+        return "Meeting Expectations"
+    elif difference < -5:  # Significant decrease
         return "Underperforming"
-    else:
+    else:  # Minor decrease
         return "Meeting Expectations"
 
 # CSV Template
