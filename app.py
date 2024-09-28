@@ -3,7 +3,12 @@ import pandas as pd
 import joblib
 from sklearn.linear_model import LinearRegression
 import numpy as np
-import matplotlib.pyplot as plt
+
+# Try to import matplotlib, but handle the error if it doesn't exist
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    st.error("Matplotlib is not installed. Please install it using 'pip install matplotlib'.")
 
 # Streamlit app for student performance prediction
 st.title("Student Group Performance Prediction")
@@ -95,14 +100,16 @@ if uploaded_file is not None:
         st.write("Predictions and Performance Status:")
         st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
         
-        # Plot a bar chart for performance status
-        st.write("Performance Status Breakdown:")
-        performance_counts = df['Performance_Status'].value_counts()
+        # Plot a pie chart for performance status, only if matplotlib is available
+        if 'plt' in globals():
+            st.write("Performance Status Breakdown:")
+            performance_counts = df['Performance_Status'].value_counts()
 
-        # Plotting the bar chart
-        fig, ax = plt.subplots()
-        ax.bar(performance_counts.index, performance_counts.values, color=['green', 'yellow', 'red'])
-        ax.set_xlabel("Performance Status")
-        ax.set_ylabel("Number of Students")
-        ax.set_title("Student Performance Status Breakdown")
-        st.pyplot(fig)
+            # Plotting the pie chart
+            fig, ax = plt.subplots()
+            ax.pie(performance_counts, labels=performance_counts.index, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'])
+            ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular.
+            plt.title("STUDENT PERFORMANCE EXPECTATIONS")
+            st.pyplot(fig)
+        else:
+            st.error("Matplotlib is not available to plot the chart.")
