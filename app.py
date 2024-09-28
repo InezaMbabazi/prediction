@@ -84,4 +84,16 @@ if uploaded_file is not None:
         performance_status = []
         for i, row in df.iterrows():
             prediction = predictions[i]
-           
+            status = determine_group_performance_status(row, group_avg, prediction)
+            performance_status.append(status)
+        
+        # Add predictions and performance status to the dataframe
+        df['Predicted_Marks'] = predictions
+        df['Performance_Status'] = performance_status
+        
+        # Display predictions and performance status
+        st.write("Predictions and Performance Status:")
+        st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
+        
+        # Force the output to appear even if button is clicked multiple times
+        st.dataframe(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
