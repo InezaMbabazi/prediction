@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import joblib
-from sklearn.linear_model import LinearRegression
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -57,37 +56,45 @@ if uploaded_file is not None:
 
     if st.button("Predict"):
         # Drop rows with missing values in relevant columns
-        df = df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks']].dropna()
-        
-        # Prepare the features for prediction
-        features = df[['High_School_Grade', 'Entry_Exam_Score']]
-        
-        # Make predictions
-        predictions = model.predict(features)
+        df_clean = df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks']].dropna()
 
-        # Determine performance status for each student
-        performance_status = []
-        for i, row in df.iterrows():
-            prediction = predictions[i]
-            status = determine_group_performance_status(row, prediction)
-            performance_status.append(status)
+        # Check if there are any rows left after dropping NaNs
+        if df_clean.empty:
+            st.warning("No valid data available for prediction after dropping rows with missing values.")
+        else:
+            # Prepare the features for prediction
+            features = df_clean[['High_School_Grade', 'Entry_Exam_Score']].values
+            
+            # Make predictions
+            try:
+                predictions = model.predict(features)
 
-        # Add predictions and performance status to the dataframe
-        df['Predicted_Marks'] = predictions
-        df['Performance_Status'] = performance_status
-        
-        # Display predictions and performance status
-        st.write("Predictions and Performance Status:")
-        st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
-        
-        # Plot a pie chart for performance status
-        performance_counts = df['Performance_Status'].value_counts()
+                # Determine performance status for each student
+                performance_status = []
+                for i, row in df_clean.iterrows():
+                    prediction = predictions[i]
+                    status = determine_group_performance_status(row, prediction)
+                    performance_status.append(status)
 
-        st.write("Performance Status Breakdown:")
-        fig, ax = plt.subplots()
-        ax.pie(performance_counts, labels=performance_counts.index, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'])
-        ax.axis('equal')  # Equal aspect ratio ensures that pie chart is circular.
-        st.pyplot(fig)
+                # Add predictions and performance status to the dataframe
+                df_clean['Predicted_Marks'] = predictions
+                df_clean['Performance_Status'] = performance_status
+                
+                # Display predictions and performance status
+                st.write("Predictions and Performance Status:")
+                st.write(df_clean[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
+                
+                # Plot a pie chart for performance status
+                performance_counts = df_clean['Performance_Status'].value_counts()
+
+                st.write("Performance Status Breakdown:")
+                fig, ax = plt.subplots()
+                ax.pie(performance_counts, labels=performance_counts.index, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'])
+                ax.axis('equal')  # Equal aspect ratio ensures that pie chart is circular.
+                st.pyplot(fig)
+
+            except Exception as e:
+                st.error(f"Error during prediction: {e}")
 
 # Footer
 st.write("---")
