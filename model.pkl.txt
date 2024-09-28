@@ -1,0 +1,4 @@
+import joblib
+
+# Assuming 'model' is your trained model
+joblib.dump(model, 'prediction.pkl')
