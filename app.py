@@ -3,7 +3,12 @@ import pandas as pd
 import joblib
 from sklearn.linear_model import LinearRegression
 import numpy as np
-import matplotlib.pyplot as plt
+
+# Try to import matplotlib, but handle the error if it doesn't exist
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    st.error("Matplotlib is not installed. Please install it using 'pip install matplotlib'.")
 
 # Streamlit app for student performance prediction
 st.title("Student Group Performance Prediction")
@@ -14,18 +19,16 @@ try:
 except FileNotFoundError:
     st.write("Model not found. Training a new model...")
 
-    # Sample training data for regression (including Principal Passes)
+    # Sample training data for regression
     data = {
         'High_School_Grade': [85, 90, 60, 75, 82],
         'Entry_Exam_Score': [78, 85, 65, 70, 80],
         'Current_Marks': [75, 88, 58, 72, 79],
-        'Principal_Passes': [12, 14, 10, 9, 15],
         'Passed': [1, 1, 0, 1, 1]  # 1 for passed, 0 for not passed
     }
     df_train = pd.DataFrame(data)
 
-    # Features and target variable
-    X_train = df_train[['High_School_Grade', 'Entry_Exam_Score', 'Principal_Passes']]
+    X_train = df_train[['High_School_Grade', 'Entry_Exam_Score']]
     y_train = df_train['Current_Marks']
 
     # Train the model
@@ -51,8 +54,7 @@ def create_template():
         "Student_ID": [],
         "High_School_Grade": [],
         "Entry_Exam_Score": [],
-        "Current_Marks": [],
-        "Principal_Passes": []
+        "Current_Marks": []
     }
     df_template = pd.DataFrame(template_data)
     return df_template
@@ -75,42 +77,39 @@ if uploaded_file is not None:
 
     if st.button("Predict"):
         # Prepare the features for prediction
-        feature_columns = ['High_School_Grade', 'Entry_Exam_Score', 'Principal_Passes']
-        available_features = df[feature_columns].dropna()
-
-        # Predict using available features
-        predictions = model.predict(available_features)
-
-        # Fill predictions back into the original DataFrame
-        df['Predicted_Marks'] = np.nan
-        df.loc[available_features.index, 'Predicted_Marks'] = predictions
-
+        features = df[['High_School_Grade', 'Entry_Exam_Score']]
+        
+        # Make predictions
+        predictions = model.predict(features)
+        
         # Calculate the group average for comparison
         group_avg = df['High_School_Grade'].mean()
         
         # Determine group performance status for each student
         performance_status = []
         for i, row in df.iterrows():
-            if pd.notna(row['Predicted_Marks']):
-                status = determine_group_performance_status(row, group_avg, row['Predicted_Marks'])
-            else:
-                status = "Insufficient Data"
+            prediction = predictions[i]
+            status = determine_group_performance_status(row, group_avg, prediction)
             performance_status.append(status)
         
-        # Add performance status to the dataframe
+        # Add predictions and performance status to the dataframe
+        df['Predicted_Marks'] = predictions
         df['Performance_Status'] = performance_status
         
         # Display predictions and performance status
         st.write("Predictions and Performance Status:")
-        st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Principal_Passes', 'Predicted_Marks', 'Performance_Status']])
+        st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
         
-        # Plot a pie chart for performance status
-        st.write("Performance Status Breakdown:")
-        performance_counts = df['Performance_Status'].value_counts()
+        # Plot a pie chart for performance status, only if matplotlib is available
+        if 'plt' in globals():
+            st.write("Performance Status Breakdown:")
+            performance_counts = df['Performance_Status'].value_counts()
 
-        # Plotting the pie chart
-        fig, ax = plt.subplots()
-        ax.pie(performance_counts, labels=performance_counts.index, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red', 'blue'])
-        ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular.
-        plt.title("STUDENT PERFORMANCE EXPECTATIONS")
-        st.pyplot(fig)
+            # Plotting the pie chart
+            fig, ax = plt.subplots()
+            ax.pie(performance_counts, labels=performance_counts.index, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'])
+            ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular.
+            plt.title("STUDENT PERFORMANCE EXPECTATIONS")
+            st.pyplot(fig)
+        else:
+            st.error("Matplotlib is not available to plot the chart.")
