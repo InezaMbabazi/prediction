@@ -3,44 +3,17 @@ import pandas as pd
 import joblib
 from sklearn.linear_model import LinearRegression
 import numpy as np
+import matplotlib.pyplot as plt
 
-# Try to import matplotlib, but handle the error if it doesn't exist
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    st.error("Matplotlib is not installed. Please install it using 'pip install matplotlib'.")
-
-# Streamlit app for student performance prediction
-st.title("Student Group Performance Prediction")
-
-# Try to load the model, or train a new one if not available
+# Load the trained model
 try:
     model = joblib.load('student_model.pkl')
 except FileNotFoundError:
-    st.write("Model not found. Training a new model...")
-
-    # Sample training data for regression
-    data = {
-        'High_School_Grade': [85, 90, 60, 75, 82],
-        'Entry_Exam_Score': [78, 85, 65, 70, 80],
-        'Current_Marks': [75, 88, 58, 72, 79],
-        'Passed': [1, 1, 0, 1, 1]  # 1 for passed, 0 for not passed
-    }
-    df_train = pd.DataFrame(data)
-
-    X_train = df_train[['High_School_Grade', 'Entry_Exam_Score']]
-    y_train = df_train['Current_Marks']
-
-    # Train the model
-    model = LinearRegression()
-    model.fit(X_train, y_train)
-
-    # Save the trained model
-    joblib.dump(model, 'student_model.pkl')
-    st.write("Model trained and saved.")
+    st.error("Model not found. Please train and save the model first.")
+    st.stop()
 
 # Function to determine performance status based on group trends
-def determine_group_performance_status(row, group_avg, prediction):
+def determine_group_performance_status(row, prediction):
     if row['Current_Marks'] > prediction + 2:
         return "Exceeding Expectations"
     elif row['Current_Marks'] < prediction - 2:
@@ -81,17 +54,14 @@ if uploaded_file is not None:
         
         # Make predictions
         predictions = model.predict(features)
-        
-        # Calculate the group average for comparison
-        group_avg = df['High_School_Grade'].mean()
-        
-        # Determine group performance status for each student
+
+        # Determine performance status for each student
         performance_status = []
         for i, row in df.iterrows():
             prediction = predictions[i]
-            status = determine_group_performance_status(row, group_avg, prediction)
+            status = determine_group_performance_status(row, prediction)
             performance_status.append(status)
-        
+
         # Add predictions and performance status to the dataframe
         df['Predicted_Marks'] = predictions
         df['Performance_Status'] = performance_status
@@ -100,16 +70,11 @@ if uploaded_file is not None:
         st.write("Predictions and Performance Status:")
         st.write(df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
         
-        # Plot a pie chart for performance status, only if matplotlib is available
-        if 'plt' in globals():
-            st.write("Performance Status Breakdown:")
-            performance_counts = df['Performance_Status'].value_counts()
+        # Plot a pie chart for performance status
+        performance_counts = df['Performance_Status'].value_counts()
 
-            # Plotting the pie chart
-            fig, ax = plt.subplots()
-            ax.pie(performance_counts, labels=performance_counts.index, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'])
-            ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular.
-            plt.title("STUDENT PERFORMANCE EXPECTATIONS")
-            st.pyplot(fig)
-        else:
-            st.error("Matplotlib is not available to plot the chart.")
+        st.write("Performance Status Breakdown:")
+        fig, ax = plt.subplots()
+        ax.pie(performance_counts, labels=performance_counts.index, autopct='%1.1f%%', startangle=90, colors=['green', 'yellow', 'red'])
+        ax.axis('equal')  # Equal aspect ratio ensures that pie chart is circular.
+        st.pyplot(fig)
