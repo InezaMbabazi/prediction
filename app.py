@@ -13,7 +13,7 @@ except FileNotFoundError:
     st.stop()
 
 # Title and description
-st.title("University Student's performance Prediction")
+st.title("University Student's Prediction")
 st.write("This model will be used to determine a student's performance using historical data from high school and entry exams.")
 
 # Function to determine performance status based on group trends
@@ -56,6 +56,9 @@ if uploaded_file is not None:
     st.write(df)
 
     if st.button("Predict"):
+        # Drop rows with missing values in relevant columns
+        df = df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks']].dropna()
+        
         # Prepare the features for prediction
         features = df[['High_School_Grade', 'Entry_Exam_Score']]
         
