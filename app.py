@@ -13,7 +13,7 @@ except FileNotFoundError:
     st.stop()
 
 # Title and description
-st.title("University Student's Prediction")
+st.title("University Student's performance Prediction")
 st.write("This model will be used to determine a student's performance using historical data from high school and entry exams.")
 
 # Function to determine performance status based on group trends
