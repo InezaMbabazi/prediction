@@ -6,10 +6,7 @@ import matplotlib.pyplot as plt
 
 # Load the trained model
 try:
-   model = joblib.load('student_model.pkl')
-
-
-
+    model = joblib.load('student_model.pkl')
 except FileNotFoundError:
     st.error("Model not found. Please train and save the model first.")
     st.stop()
@@ -18,16 +15,16 @@ except FileNotFoundError:
 st.title("University Student's Performance Prediction")
 st.write("This model predicts a student's performance using historical data from high school and entry exams.")
 
-# Function to determine performance status based on group trends
+# Function to determine performance status based on predicted vs current marks
 def determine_group_performance_status(row, prediction):
-    difference = row['Current_Marks'] - prediction
-    if difference >= 5:  # Significant increase
+    difference = prediction - row['Current_Marks']  # Updated: Predicted Marks - Current Marks
+    if difference >= 5:  # Significant improvement
         return "Exceeding Expectations"
-    elif 0 <= difference < 5:  # Minor increase or close to predicted
+    elif 0 <= difference < 5:  # Slight improvement or close to predicted
         return "Meeting Expectations"
-    elif difference < -5:  # Significant decrease
+    elif difference < -5:  # Significant underperformance
         return "Underperforming"
-    else:  # Minor decrease
+    else:  # Minor underperformance
         return "Meeting Expectations"
 
 # CSV Template for users to download
