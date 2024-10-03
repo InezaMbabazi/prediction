@@ -15,16 +15,16 @@ except FileNotFoundError:
 st.title("University Student's Performance Prediction")
 st.write("This model predicts a student's performance using historical data from high school and entry exams.")
 
-# Function to determine performance status based on predicted vs current marks
+# Function to determine performance status based on group trends
 def determine_group_performance_status(row, prediction):
-    difference = prediction - row['Current_Marks']  # Updated: Predicted Marks - Current Marks
-    if difference >= 5:  # Significant improvement
+    difference = row['Current_Marks'] - prediction
+    if difference >= 5:  # Significant increase
         return "Exceeding Expectations"
-    elif 0 <= difference < 5:  # Slight improvement or close to predicted
+    elif 0 <= difference < 5:  # Minor increase or close to predicted
         return "Meeting Expectations"
-    elif difference < -5:  # Significant underperformance
+    elif difference < -5:  # Significant decrease
         return "Underperforming"
-    else:  # Minor underperformance
+    else:  # Minor decrease
         return "Meeting Expectations"
 
 # CSV Template for users to download
