@@ -12,8 +12,8 @@ except FileNotFoundError:
     st.stop()
 
 # Title and description
-st.title("University Student's Prediction")
-st.write("This model will be used to determine a student's performance using historical data from high school and entry exams.")
+st.title("University Student's Performance Prediction")
+st.write("This model predicts a student's performance using historical data from high school and entry exams.")
 
 # Function to determine performance status based on group trends
 def determine_group_performance_status(row, prediction):
@@ -27,7 +27,7 @@ def determine_group_performance_status(row, prediction):
     else:  # Minor decrease
         return "Meeting Expectations"
 
-# CSV Template
+# CSV Template for users to download
 def create_template():
     template_data = {
         "Student_ID": [],
@@ -38,7 +38,7 @@ def create_template():
     df_template = pd.DataFrame(template_data)
     return df_template
 
-# Download the template CSV file
+# Provide the template CSV file for download
 st.write("Download the template CSV file:")
 df_template = create_template()
 st.download_button("Download Template", df_template.to_csv(index=False), file_name="student_performance_template.csv", mime='text/csv')
@@ -47,13 +47,14 @@ st.download_button("Download Template", df_template.to_csv(index=False), file_na
 uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    # Read the CSV file
+    # Read the uploaded CSV file
     df = pd.read_csv(uploaded_file)
     
     # Display input data
     st.write("Input Data:")
     st.write(df)
 
+    # Predict button
     if st.button("Predict"):
         # Drop rows with missing values in relevant columns
         df_clean = df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks']].dropna()
@@ -64,9 +65,9 @@ if uploaded_file is not None:
         else:
             # Prepare the features for prediction
             features = df_clean[['High_School_Grade', 'Entry_Exam_Score']].values
-            
-            # Make predictions
+
             try:
+                # Make predictions
                 predictions = model.predict(features)
 
                 # Determine performance status for each student
@@ -79,11 +80,11 @@ if uploaded_file is not None:
                 # Add predictions and performance status to the dataframe
                 df_clean['Predicted_Marks'] = predictions
                 df_clean['Performance_Status'] = performance_status
-                
+
                 # Display predictions and performance status
                 st.write("Predictions and Performance Status:")
                 st.write(df_clean[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
-                
+
                 # Plot a pie chart for performance status
                 performance_counts = df_clean['Performance_Status'].value_counts()
 
