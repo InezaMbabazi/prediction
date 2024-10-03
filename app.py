@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 
 # Load the trained model
 try:
-    model = joblib.load('./path_to_directory/student_model.pkl')
+    model = joblib.load('./prediction/student_model.pkl')
+
 
 except FileNotFoundError:
     st.error("Model not found. Please train and save the model first.")
