@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st 
 import pandas as pd
 import joblib
 import numpy as np
@@ -53,6 +53,12 @@ if uploaded_file is not None:
     # Display input data
     st.write("Input Data:")
     st.write(df)
+
+    # Calculate and display correlations
+    if 'High_School_Grade' in df.columns and 'Entry_Exam_Score' in df.columns and 'Current_Marks' in df.columns:
+        correlation_matrix = df[['High_School_Grade', 'Entry_Exam_Score', 'Current_Marks']].corr()
+        st.write("Correlation Matrix:")
+        st.write(correlation_matrix)
 
     # Predict button
     if st.button("Predict"):
