@@ -8,23 +8,23 @@ import matplotlib.pyplot as plt
 try:
     model = joblib.load('student_model.pkl')
 except FileNotFoundError:
-    st.error("Model not found. Please train and save the model first.")
+    st.error("Model not found. Please ensure 'student_model.pkl' is in the project directory.")
     st.stop()
 
 # Title and description
 st.title("University Student's Performance Prediction")
-st.write("This model predicts a student's performance using historical data including high school grades, entry exams, and national exam scores.")
+st.write("This model predicts a student's performance using historical data from high school, entry exams, and national exams.")
 
-# Function to determine performance status
+# Function to determine performance status based on group trends
 def determine_group_performance_status(row, prediction):
     difference = row['Current_Marks'] - prediction
-    if difference >= 5:
+    if difference >= 5:  # Significant increase
         return "Exceeding Expectations"
-    elif 0 <= difference < 5:
+    elif 0 <= difference < 5:  # Minor increase or close to predicted
         return "Meeting Expectations"
-    elif difference < -5:
+    elif difference < -5:  # Significant decrease
         return "Underperforming"
-    else:
+    else:  # Minor decrease
         return "Meeting Expectations"
 
 # CSV Template for users to download
@@ -48,6 +48,7 @@ st.download_button("Download Template", df_template.to_csv(index=False), file_na
 uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
 if uploaded_file is not None:
+    # Read the uploaded CSV file
     df = pd.read_csv(uploaded_file)
     
     # Display input data
@@ -62,23 +63,28 @@ if uploaded_file is not None:
 
     # Predict button
     if st.button("Predict"):
+        # Drop rows with missing values in relevant columns
         df_clean = df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'National_Exam_Score', 'Current_Marks']].dropna()
 
+        # Check if there are any rows left after dropping NaNs
         if df_clean.empty:
             st.warning("No valid data available for prediction after dropping rows with missing values.")
         else:
+            # Prepare the features for prediction
             features = df_clean[['High_School_Grade', 'Entry_Exam_Score', 'National_Exam_Score']].values
 
             try:
+                # Make predictions
                 predictions = model.predict(features)
 
-                # Determine performance status
+                # Determine performance status for each student
                 performance_status = []
                 for i, row in df_clean.iterrows():
                     prediction = predictions[i]
                     status = determine_group_performance_status(row, prediction)
                     performance_status.append(status)
 
+                # Add predictions and performance status to the dataframe
                 df_clean['Predicted_Marks'] = predictions
                 df_clean['Performance_Status'] = performance_status
 
@@ -86,7 +92,7 @@ if uploaded_file is not None:
                 st.write("Predictions and Performance Status:")
                 st.write(df_clean[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'National_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
 
-                # Plot pie chart for performance status
+                # Plot a pie chart for performance status
                 performance_counts = df_clean['Performance_Status'].value_counts()
 
                 st.write("Performance Status Breakdown:")
