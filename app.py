@@ -1,19 +1,20 @@
-import streamlit as st
+import streamlit as st  
 import pandas as pd
 import joblib
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 
 # Load the trained model
 try:
     model = joblib.load('student_model.pkl')
 except FileNotFoundError:
-    st.error("Model not found. Please ensure 'student_model.pkl' is in the project directory.")
+    st.error("Model not found. Please train and save the model first.")
     st.stop()
 
 # Title and description
 st.title("University Student's Performance Prediction")
-st.write("This model predicts a student's performance using historical data from high school, entry exams, and national exams.")
+st.write("This model predicts a student's performance using historical data from high school and entry exams.")
 
 # Function to determine performance status based on group trends
 def determine_group_performance_status(row, prediction):
@@ -60,6 +61,44 @@ if uploaded_file is not None:
         correlation_matrix = df[['High_School_Grade', 'Entry_Exam_Score', 'National_Exam_Score', 'Current_Marks']].corr()
         st.write("Correlation Matrix:")
         st.write(correlation_matrix)
+
+    # Regression Analysis
+    if 'High_School_Grade' in df.columns and 'Entry_Exam_Score' in df.columns and 'National_Exam_Score' in df.columns and 'Current_Marks' in df.columns:
+        # Prepare features (independent variables) and target (dependent variable)
+        X = df[['High_School_Grade', 'Entry_Exam_Score', 'National_Exam_Score']].dropna()  # Independent variables
+        y = df['Current_Marks'].dropna()  # Dependent variable
+
+        # Create and fit the model
+        model = LinearRegression()
+        model.fit(X, y)
+
+        # Get the regression coefficients (impact of each independent variable)
+        coefficients = model.coef_
+
+        # Display the coefficients
+        st.write("Regression Coefficients:")
+        st.write(f"High_School_Grade: {coefficients[0]}")
+        st.write(f"Entry_Exam_Score: {coefficients[1]}")
+        st.write(f"National_Exam_Score: {coefficients[2]}")
+
+        # Display the intercept (constant term)
+        st.write(f"Intercept: {model.intercept_}")
+
+        # R-squared value
+        r2 = model.score(X, y)
+        st.write(f"R-squared: {r2}")
+
+        # Predicting Current Marks using the model
+        predicted_marks = model.predict(X)
+
+        # Visualizing actual vs predicted marks
+        fig, ax = plt.subplots()
+        ax.scatter(y, predicted_marks)
+        ax.plot([y.min(), y.max()], [y.min(), y.max()], '--k', label="Perfect Prediction")
+        ax.set_xlabel('Actual Marks')
+        ax.set_ylabel('Predicted Marks')
+        ax.legend()
+        st.pyplot(fig)
 
     # Predict button
     if st.button("Predict"):
