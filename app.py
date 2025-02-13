@@ -1,4 +1,4 @@
-import streamlit as st 
+import streamlit as st  
 import pandas as pd
 import joblib
 import numpy as np
@@ -13,7 +13,7 @@ except FileNotFoundError:
 
 # Title and description
 st.title("University Student's Performance Prediction")
-st.write("This model predicts a student's performance using historical data from high school and entry exams.")
+st.write("This model predicts a student's performance using historical data, including high school grades, entry exams, and national exam scores.")
 
 # Function to determine performance status based on group trends
 def determine_group_performance_status(row, prediction):
@@ -33,6 +33,7 @@ def create_template():
         "Student_ID": [],
         "High_School_Grade": [],
         "Entry_Exam_Score": [],
+        "National_Exam_Score": [],
         "Current_Marks": []
     }
     df_template = pd.DataFrame(template_data)
@@ -55,22 +56,22 @@ if uploaded_file is not None:
     st.write(df)
 
     # Calculate and display correlations
-    if 'High_School_Grade' in df.columns and 'Entry_Exam_Score' in df.columns and 'Current_Marks' in df.columns:
-        correlation_matrix = df[['High_School_Grade', 'Entry_Exam_Score', 'Current_Marks']].corr()
+    if 'High_School_Grade' in df.columns and 'Entry_Exam_Score' in df.columns and 'National_Exam_Score' in df.columns and 'Current_Marks' in df.columns:
+        correlation_matrix = df[['High_School_Grade', 'Entry_Exam_Score', 'National_Exam_Score', 'Current_Marks']].corr()
         st.write("Correlation Matrix:")
         st.write(correlation_matrix)
 
     # Predict button
     if st.button("Predict"):
         # Drop rows with missing values in relevant columns
-        df_clean = df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks']].dropna()
+        df_clean = df[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'National_Exam_Score', 'Current_Marks']].dropna()
 
         # Check if there are any rows left after dropping NaNs
         if df_clean.empty:
             st.warning("No valid data available for prediction after dropping rows with missing values.")
         else:
             # Prepare the features for prediction
-            features = df_clean[['High_School_Grade', 'Entry_Exam_Score']].values
+            features = df_clean[['High_School_Grade', 'Entry_Exam_Score', 'National_Exam_Score']].values
 
             try:
                 # Make predictions
@@ -89,7 +90,7 @@ if uploaded_file is not None:
 
                 # Display predictions and performance status
                 st.write("Predictions and Performance Status:")
-                st.write(df_clean[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
+                st.write(df_clean[['Student_ID', 'High_School_Grade', 'Entry_Exam_Score', 'National_Exam_Score', 'Current_Marks', 'Predicted_Marks', 'Performance_Status']])
 
                 # Plot a pie chart for performance status
                 performance_counts = df_clean['Performance_Status'].value_counts()
