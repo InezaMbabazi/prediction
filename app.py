@@ -1,4 +1,4 @@
-import streamlit as st  
+import streamlit as st
 import pandas as pd
 import joblib
 import numpy as np
@@ -62,44 +62,12 @@ if uploaded_file is not None:
         st.write("Correlation Matrix:")
         st.write(correlation_matrix)
 
-    # Regression Analysis
-    if 'High_School_Grade' in df.columns and 'Entry_Exam_Score' in df.columns and 'National_Exam_Score' in df.columns and 'Current_Marks' in df.columns:
-        # Prepare features (independent variables) and target (dependent variable)
-        X = df[['High_School_Grade', 'Entry_Exam_Score', 'National_Exam_Score']].dropna()  # Independent variables
-        y = df['Current_Marks'].dropna()  # Dependent variable
-
-        # Create and fit the model
-        model = LinearRegression()
-        model.fit(X, y)
-
-        # Get the regression coefficients (impact of each independent variable)
-        coefficients = model.coef_
-
-        # Display the coefficients
-        st.write("Regression Coefficients:")
-        st.write(f"High_School_Grade: {coefficients[0]}")
-        st.write(f"Entry_Exam_Score: {coefficients[1]}")
-        st.write(f"National_Exam_Score: {coefficients[2]}")
-
-        # Display the intercept (constant term)
-        st.write(f"Intercept: {model.intercept_}")
-
-        # R-squared value
-        r2 = model.score(X, y)
-        st.write(f"R-squared: {r2}")
-
-        # Predicting Current Marks using the model
-        predicted_marks = model.predict(X)
-
-        # Visualizing actual vs predicted marks
-        fig, ax = plt.subplots()
-        ax.scatter(y, predicted_marks)
-        ax.plot([y.min(), y.max()], [y.min(), y.max()], '--k', label="Perfect Prediction")
-        ax.set_xlabel('Actual Marks')
-        ax.set_ylabel('Predicted Marks')
-        ax.legend()
-        st.pyplot(fig)
-
+        # Add interpretation of the correlation matrix
+        st.write("### Interpretation of the Correlation Matrix:")
+        st.write("- A positive correlation between `High_School_Grade`, `Entry_Exam_Score`, and `Current_Marks` suggests that higher grades and exam scores are associated with better performance in current marks.")
+        st.write("- A strong correlation between `Entry_Exam_Score` and `Current_Marks` (e.g., +0.8) indicates that performance on the entry exam is a strong predictor of current performance.")
+        st.write("- A lower correlation between `National_Exam_Score` and `Current_Marks` suggests that it may have a weaker influence on current performance compared to other factors.")
+        
     # Predict button
     if st.button("Predict"):
         # Drop rows with missing values in relevant columns
@@ -140,6 +108,18 @@ if uploaded_file is not None:
                 ax.axis('equal')  # Equal aspect ratio ensures that pie chart is circular.
                 st.pyplot(fig)
 
+                # Add interpretation of the regression coefficients
+                st.write("### Interpretation of the Regression Coefficients:")
+                # Assuming you've already retrieved the coefficients from the model
+                coefficients = model.coef_
+                st.write(f"- The coefficient for `High_School_Grade` is {coefficients[0]:.2f}. This means that for each unit increase in high school grade, the predicted `Current_Marks` increases by {coefficients[0]:.2f}.")
+                st.write(f"- The coefficient for `Entry_Exam_Score` is {coefficients[1]:.2f}. This means that for each unit increase in entry exam score, the predicted `Current_Marks` increases by {coefficients[1]:.2f}.")
+                st.write(f"- The coefficient for `National_Exam_Score` is {coefficients[2]:.2f}. This means that for each unit increase in national exam score, the predicted `Current_Marks` increases by {coefficients[2]:.2f}.")
+                
+                # Add R-squared interpretation
+                st.write("### Model Evaluation:")
+                st.write(f"- The R-squared value of the model is {model.score(features, df_clean['Current_Marks']):.2f}. This indicates that {model.score(features, df_clean['Current_Marks'])*100:.2f}% of the variance in `Current_Marks` is explained by the independent variables (`High_School_Grade`, `Entry_Exam_Score`, and `National_Exam_Score`).")
+                
             except Exception as e:
                 st.error(f"Error during prediction: {e}")
 
